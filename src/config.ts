@@ -1,12 +1,20 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const config = {
-  apiKey: 'AIzaSyBbXcxbDdbFSKHdm43rllGkS9Bpkamu4Dg',
-  authDomain: 'flower-power-extension.firebaseapp.com',
-  databaseURL: 'https://flower-power-extension-default-rtdb.firebaseio.com',
-  projectId: 'flower-power-extension',
-  storageBucket: 'flower-power-extension.appspot.com',
-  messagingSenderId: '116345179613',
-  appId: '1:116345179613:web:69eb173d68989ece5b7a34',
-  measurementId: 'G-5LYN634P8Z',
+  apiKey: "AIzaSyAVd49dNPZLCcvhcCdNXYMBA_m5aUCLxvI",
+  authDomain: "toke-n-tally.firebaseapp.com",
+  projectId: "toke-n-tally",
+  storageBucket: "toke-n-tally.appspot.com",
+  messagingSenderId: "615572921940",
+  appId: "1:615572921940:web:6ca2349edc6709138117c1",
+  measurementId: "G-HXRW78QVJ2"
 };
 
+// Initialize Firebase
 export default config;
