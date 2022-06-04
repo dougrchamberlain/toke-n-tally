@@ -4,6 +4,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword, signOut, User
 } from '@firebase/auth';
+import { getAnalytics } from '@firebase/analytics';
 import * as React from 'react';
 import config from './config';
 import './style.css';
@@ -15,6 +16,7 @@ export default class Login extends React.Component<any,any> {
 
     this.state = {email:'', password:'', user:null}
     const app = initializeApp(config);
+    const analytics = getAnalytics(app);
 
     onAuthStateChanged(getAuth(app), (user) => {
       console.log(user, 'index');
