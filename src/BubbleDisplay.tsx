@@ -1,10 +1,6 @@
 
 import * as React from 'react';
 
-
-
-const OZ = 28.3495;
-
 interface amount {
   available: number;
   max: number;
@@ -13,12 +9,7 @@ interface amount {
 }
 
 class BubbleDisplay extends React.Component<amount, any> {
-  constructor(props: amount) {
-    super(props);
 
-  }
-
- 
   renderProgressBar() {
     const { available, max, displayLabel, reupDate } = this.props;
     var percent = (available / max) * 100;
