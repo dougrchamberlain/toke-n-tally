@@ -1,8 +1,7 @@
-import { getAnalytics } from '@firebase/analytics';
 import { initializeApp } from '@firebase/app';
 import {
   getAuth,
-  onAuthStateChanged,
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword, signOut, User
 } from '@firebase/auth';
 import * as React from 'react';
@@ -11,43 +10,47 @@ import './style.css';
 
 
 
-
 export default class Login extends React.Component<any, any> {
 
   constructor(props: any) {
     super(props);
 
-    this.state = { email: '', password: '', name:'' }
+    this.state = { email: '', password: '' }
 
     this.signIn = this.signIn.bind(this);
     this.setEmail = this.setEmail.bind(this);
     this.setPassword = this.setPassword.bind(this);
-    this.logoff  = this.logoff.bind(this);
+    this.logoff = this.logoff.bind(this);
+    this.createUser = this.createUser.bind(this);
 
   }
 
-  componentDidMount(){
-    const app = initializeApp(config);
-    const auth = getAuth(app);
 
-    onAuthStateChanged(auth, (user) => {
-      console.log(user);
-      if(user){
-      this.setState({name: user.email})
-      }
-    });
-  }
-
- 
-  
   logoff() {
     const app = initializeApp(config);
-const auth = getAuth(app);
+    const auth = getAuth(app);
     signOut(auth).then((value) => {
-      console.log(value);
+      
       this.setEmail('');
     })
     //this is needed to clear out the value in user object when signing out.
+  }
+
+  createUser() {
+
+
+    const auth = getAuth();
+    createUserWithEmailAndPassword(auth, this.state.email, this.state.password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
   }
 
   signIn() {
@@ -58,7 +61,7 @@ const auth = getAuth(app);
       .then((userCredential) => {
         // Signed in
         const user: User = userCredential.user;
-          this.setState({name: user.displayName})
+        this.setState({ name: user.displayName })
         // ...
       })
       .catch((error) => {
@@ -80,8 +83,8 @@ const auth = getAuth(app);
     if (this.state.name) {
       return (
         <div>
-        
-<button onClick={this.logoff}>Sign Out/LogOff</button>
+
+          <button onClick={this.logoff}>Sign Out/LogOff</button>
 
         </div>
       );
@@ -102,6 +105,7 @@ const auth = getAuth(app);
               placeholder="password"
             />
             <button onClick={this.signIn}>Sign In</button>
+            <button onClick={this.createUser}>Create Account</button>
           </section>
         </div>
       );

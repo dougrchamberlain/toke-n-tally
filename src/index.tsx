@@ -21,12 +21,6 @@ root.render(
 
 
 
-const app = initializeApp(config);
-
-onAuthStateChanged(getAuth(app), (user) => {
-  console.log(user, 'index');
-  //wipedata
-});
 
 
 

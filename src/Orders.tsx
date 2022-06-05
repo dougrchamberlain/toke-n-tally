@@ -9,7 +9,7 @@ import config from './config';
 const app = initializeApp(config);
 const auth = getAuth(app);
 const db = getDatabase();
-let amount= 0.0;
+
 
 
 
@@ -20,33 +20,30 @@ export default class Orders extends React.Component<any, any> {
     this.setAmountAllowed = this.setAmountAllowed.bind(this);
     this.syncAmounts = this.syncAmounts.bind(this);
 
-
   }
+
 
   componentDidMount(){
-    
-    const userRef = ref(db, `users/${auth.currentUser?.uid}`);
+      this.fetchData();
+  }
+  fetchData() {
+    const ordersRef = ref(db, `orders/${auth.currentUser?.uid}`);
 
-    onValue(userRef, (snapshot) => {
+    onValue(ordersRef, (snapshot) => {
       const data = snapshot.val();
-
       this.setState({amountAllowed: data.amountAllowed});
-      console.log(this.state.amountAllowed);
     })
   }
-
 
   setAmountAllowed(e: ChangeEvent<{value:string}>) {
     const {value} = e.currentTarget;
     this.setState({ amountAllowed:value  });
-    console.log(this.state.amountAllowed
-      )
   }
 
 
   syncAmounts() {
     console.log('syncing...');
-    set(ref(db, `users/${auth.currentUser?.uid}`), {
+    set(ref(db, `orders/${auth.currentUser?.uid}`), {
       uploadDate: new Date().toUTCString(),
       amountAllowed: this.state.amountAllowed,
     }).then((v)=>{
@@ -81,10 +78,12 @@ export default class Orders extends React.Component<any, any> {
         <div className="manual--uploadForm">
           <input
             id="amountAllowed"
-            type="text"
+            type="number"
             name="amountAllowed"
             placeholder="Amount Available"
             onChange={this.setAmountAllowed}
+            step="0.01"
+            max="2.5"
           />
           <button onClick={this.syncAmounts}>Sync Amounts</button>
         </div>

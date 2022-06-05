@@ -15,8 +15,7 @@ interface amount {
 class BubbleDisplay extends React.Component<amount, any> {
   constructor(props: amount) {
     super(props);
-    this.state   = {amountAllowed: 0.0,uploadDate: null}
- 
+
   }
 
  
