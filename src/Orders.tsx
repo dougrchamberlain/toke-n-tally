@@ -1,49 +1,68 @@
-import { getApp, initializeApp } from '@firebase/app';
+import { initializeApp } from '@firebase/app';
 import { getAuth } from '@firebase/auth';
-import { getDatabase, ref, set } from '@firebase/database';
+import { getDatabase, onValue, ref, set } from '@firebase/database';
 import * as React from 'react';
+import { ChangeEvent } from 'react';
 import BubbleDisplay from './BubbleDisplay';
 import config from './config';
 
-export default class Orders extends React.Component<any,any> {
+const app = initializeApp(config);
+const auth = getAuth(app);
+const db = getDatabase();
+let amount= 0.0;
+
+
+
+export default class Orders extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
-    this.state = { amountAllowed: 2.1 };
+    this.state = { amountAllowed:0  };
     this.setAmountAllowed = this.setAmountAllowed.bind(this);
     this.syncAmounts = this.syncAmounts.bind(this);
+
+
   }
 
-  setAmountAllowed(e : any) {
-    var raw = e.target.value;
-    this.setState({ amountAllowed: parseFloat(raw) });
+  componentDidMount(){
+    
+    const userRef = ref(db, `users/${auth.currentUser?.uid}`);
+
+    onValue(userRef, (snapshot) => {
+      const data = snapshot.val();
+
+      this.setState({amountAllowed: data.amountAllowed});
+      console.log(this.state.amountAllowed);
+    })
   }
+
+
+  setAmountAllowed(e: ChangeEvent<{value:string}>) {
+    const {value} = e.currentTarget;
+    this.setState({ amountAllowed:value  });
+    console.log(this.state.amountAllowed
+      )
+  }
+
 
   syncAmounts() {
-    var app = null;
-    try {
-      app = getApp();
-      console.log(app);
-    } catch (ex) {
-      console.log(ex);
-      app = initializeApp(config);
-    }
-
-    const auth = getAuth(app);
-    const db = getDatabase();
+    console.log('syncing...');
     set(ref(db, `users/${auth.currentUser?.uid}`), {
       uploadDate: new Date().toUTCString(),
       amountAllowed: this.state.amountAllowed,
-    });
+    }).then((v)=>{
+      console.log(v);
+    })
   }
 
   render() {
+
     return (
       <section>
         <div className="order--info">
           <BubbleDisplay
-            available={this.state?.amountAllowed}
+            available={this.state.amountAllowed}
             max={2.5}
-            displayLabel={'Flower'}
+            displayLabel={this.state?.type}
             reupDate="06/09/2022"
           />
           <BubbleDisplay

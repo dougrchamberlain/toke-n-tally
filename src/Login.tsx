@@ -9,19 +9,26 @@ import * as React from 'react';
 import config from './config';
 import './style.css';
 
+
+
+
 export default class Login extends React.Component<any, any> {
 
   constructor(props: any) {
     super(props);
 
     this.state = { email: '', password: '', name:'' }
+
+    this.signIn = this.signIn.bind(this);
+    this.setEmail = this.setEmail.bind(this);
+    this.setPassword = this.setPassword.bind(this);
+    this.logoff  = this.logoff.bind(this);
+
+  }
+
+  componentDidMount(){
     const app = initializeApp(config);
     const auth = getAuth(app);
-    const analytics = getAnalytics(app);
-    analytics.app.automaticDataCollectionEnabled = true;
-
-
-
 
     onAuthStateChanged(auth, (user) => {
       console.log(user);
@@ -29,11 +36,13 @@ export default class Login extends React.Component<any, any> {
       this.setState({name: user.email})
       }
     });
- 
   }
+
+ 
+  
   logoff() {
     const app = initializeApp(config);
-    const auth = getAuth(app);
+const auth = getAuth(app);
     signOut(auth).then((value) => {
       console.log(value);
       this.setEmail('');
@@ -43,12 +52,9 @@ export default class Login extends React.Component<any, any> {
 
   signIn() {
     //push to firebase
- 
     const app = initializeApp(config);
     const auth = getAuth(app);
-    const {email,password} = this.state;
-
-    signInWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, this.state.email, this.state.password)
       .then((userCredential) => {
         // Signed in
         const user: User = userCredential.user;

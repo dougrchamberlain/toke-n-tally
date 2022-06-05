@@ -1,23 +1,11 @@
-import { initializeApp } from '@firebase/app';
-import { getAuth,onAuthStateChanged } from '@firebase/auth';
 import * as React from 'react';
-import './style.css';
 import Orders from './Orders';
-import config from './config';
+import './style.css';
 
 
 export default class App extends React.Component {
-  constructor(props: any){
-    super(props);
-    const app = initializeApp(config);
 
-onAuthStateChanged(getAuth(app), (user) => {
-  console.log(user, 'index');
-  //wipedata
-});
 
-    
-  }
   render() {
     return (
       <div className="appContainer">
