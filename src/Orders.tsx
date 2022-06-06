@@ -1,5 +1,5 @@
 import { initializeApp } from '@firebase/app';
-import { getAuth } from '@firebase/auth';
+import { getAuth, onAuthStateChanged } from '@firebase/auth';
 import { getDatabase, onValue, ref, set } from '@firebase/database';
 import * as React from 'react';
 import { ChangeEvent } from 'react';
@@ -8,71 +8,73 @@ import config from './config';
 
 const app = initializeApp(config);
 const auth = getAuth(app);
-const db = getDatabase();
-
-
-
+const db = getDatabase(app);
 
 export default class Orders extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
-    this.state = { amountAllowed:0  };
+    this.state = {
+      orders: {
+        amountAllowed: 0,
+        productType: "",
+        reupDates: [],
+        limit: 2.5
+      }
+    };
     this.setAmountAllowed = this.setAmountAllowed.bind(this);
     this.syncAmounts = this.syncAmounts.bind(this);
-
   }
 
-
-  componentDidMount(){
-      this.fetchData();
+  componentDidMount() {
+    this.fetchData();
   }
+
   fetchData() {
-    const ordersRef = ref(db, `orders/${auth.currentUser?.uid}`);
+    onAuthStateChanged(auth, (user: any) => {
+      const { uid } = user;
+      const ordersRef = ref(db, `orders/${uid}`);
 
-    onValue(ordersRef, (snapshot) => {
-      const data = snapshot.val();
-      this.setState({amountAllowed: data.amountAllowed});
+      onValue(ordersRef, (snapshot) => {
+        console.log(snapshot.val());
+        this.setState({ orders: snapshot.val() })
+      })
     })
+
+
   }
 
-  setAmountAllowed(e: ChangeEvent<{value:string}>) {
-    const {value} = e.currentTarget;
-    this.setState({ amountAllowed:value  });
+  setAmountAllowed(e: ChangeEvent<{ value: string }>) {
+    const { value } = e.currentTarget;
+    this.setState({ orders: { amountAllowed: value } });
   }
 
 
   syncAmounts() {
-    console.log('syncing...');
-    set(ref(db, `orders/${auth.currentUser?.uid}`), {
-      uploadDate: new Date().toUTCString(),
-      amountAllowed: this.state.amountAllowed,
-    }).then((v)=>{
+    const uid = auth.currentUser?.uid;
+    const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
+
+    set(ordersRef, this.state.orders.amountAllowed
+    ).then((v) => {
       console.log(v);
     })
   }
 
   render() {
+    const {
+      amountAllowed,
+      productType,
+      reupDates,
+      limit
+    } = this.state.orders;
 
     return (
       <section>
         <div className="order--info">
           <BubbleDisplay
-            available={this.state.amountAllowed}
-            max={2.5}
-            displayLabel={this.state?.type}
-            reupDate="06/09/2022"
-          />
-          <BubbleDisplay
-            available={3000}
-            max={14000}
-            displayLabel={'Concentrates'}
-            reupDate=""
-          />
-          <BubbleDisplay
-            available={12000}
-            max={12000}
-            displayLabel={'Edibles'}
-            reupDate=""
+            available={amountAllowed}
+            max={limit || 2.5}
+            displayLabel={productType}
+            reupDate={reupDates}
           />
         </div>
         <div className="manual--uploadForm">
@@ -82,10 +84,10 @@ export default class Orders extends React.Component<any, any> {
             name="amountAllowed"
             placeholder="Amount Available"
             onChange={this.setAmountAllowed}
+            onBlur={this.syncAmounts}
             step="0.01"
             max="2.5"
           />
-          <button onClick={this.syncAmounts}>Sync Amounts</button>
         </div>
       </section>
     );
