@@ -72,3 +72,10 @@ button {
 .BubbleDisplay--container {
   margin: 5px;
 }
+
+iframe {
+  width: 100%;
+  min-width: 100%;
+  max-height: max-content;
+  height: 90vh;
+}

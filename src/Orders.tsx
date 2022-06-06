@@ -89,6 +89,11 @@ export default class Orders extends React.Component<any, any> {
             max="2.5"
           />
         </div>
+      <div className='iframe--store'>
+      <iframe src="https://dutchie.com/embedded-menu/curaleaf-fl-st-petersburg/products/flower?">
+        NO IFRAMES
+        </iframe>
+      </div>
       </section>
     );
   }
