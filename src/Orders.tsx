@@ -90,7 +90,7 @@ export default class Orders extends React.Component<any, any> {
           />
         </div>
       <div className='iframe--store'>
-      <iframe src="https://dutchie.com/embedded-menu/curaleaf-fl-st-petersburg/products/flower?">
+      <iframe title='iframe-store' src="https://dutchie.com/embedded-menu/curaleaf-fl-st-petersburg/products/flower?">
         NO IFRAMES
         </iframe>
       </div>
