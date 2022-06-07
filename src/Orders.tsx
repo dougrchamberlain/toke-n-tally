@@ -134,7 +134,7 @@ export default class Orders extends React.Component<any, any> {
     set(ordersRef, this.state.orders.amountAllowed
     ).then((v) => {
       console.log(v);
-    })
+    })    
   }
 
   render() {
@@ -157,6 +157,7 @@ export default class Orders extends React.Component<any, any> {
           />
         </div>
         <div className="manual--uploadForm">
+          <span>{amountAllowed}/{limit}</span>
           <input
             id="amountAllowed"
             type="number"
