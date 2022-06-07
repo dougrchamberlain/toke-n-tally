@@ -11,12 +11,11 @@ export default class App extends React.Component {
       <div className="appContainer">
         <nav>
           <h1>Toke-N-Tally</h1>
+            <menu type="toolbar">
+              
+            </menu>
         </nav>
-        <Orders />
-        <small>
-          I'm working on integration with the state. I hope the extension is
-          useful without it for the time.
-        </small>
+        <Orders human="" />
       </div>)
   }
 
