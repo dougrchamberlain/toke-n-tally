@@ -115,7 +115,7 @@ export default class Orders extends React.Component<any, any> {
 
     set(ordersRef, this.state.amountAllowed
     ).then((v) => {
-    
+
       //do anything here that depends on
       console.log('pushed to cloud...');
     })
@@ -139,13 +139,20 @@ export default class Orders extends React.Component<any, any> {
             reupDate={reupDates[0]}
           />
         </div>
+
+        <div className='iframe--store'>
+          <iframe id='iframe-store'
+            title='iframe-store'
+            src="https://dutchie.com/embedded-menu/curaleaf-fl-st-petersburg/products/flower?">
+            NO IFRAMES
+          </iframe>
+        </div>
         <div className="manual--uploadForm">
-          <span>{amountAllowed}/{limit}</span>
           <input
             id="amountAllowed"
             type="number"
             name="amountAllowed"
-            placeholder="Amount Available"
+            placeholder="enter dispensable amount"
             onChange={this.setAmountAllowed}
             step="0.01"
             max={limit}
@@ -153,12 +160,6 @@ export default class Orders extends React.Component<any, any> {
           />
           <button onClick={this.syncAmounts}>manual update</button>
         </div>
-        <div className='iframe--store'>
-          <iframe id='iframe-store' title='iframe-store' src="https://dutchie.com/embedded-menu/curaleaf-fl-st-petersburg/products/flower?">
-            NO IFRAMES
-          </iframe>
-        </div>
-
       </div>
     );
   }

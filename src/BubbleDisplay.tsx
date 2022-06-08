@@ -11,21 +11,28 @@ interface amount {
 class BubbleDisplay extends React.Component<amount, any> {
 
   renderProgressBar() {
-    const { available, max, displayLabel, reupDate } = this.props;
-    var percent = (available / max) * 100;
+    const { available: remaining, max, displayLabel, reupDate } = this.props;
+    var percent = (remaining / max) * 100;
     return (
       <div className="BubbleDisplay--container">
-        <label>{displayLabel}</label>
+        <label className='product--type'>{displayLabel}</label>
         <div className="progress">
           <div
             style={{
               width: `${percent}%`,
             }}
           >
-            <div className="overlay-progress"></div>
+            <div className="overlay-progress">
+              <div className="overlay--labels">
+                <label className='fractional--display'>{remaining}/{max}oz</label>
+                <label className="text--overlay">
+                  {percent.toFixed(2)}%
+                </label>
+              </div>
+            </div>
           </div>
         </div>
-        <label className="text--overlay">{percent.toFixed(2)}%</label>
+
         <label htmlFor="reupDate">
           {reupDate ? 'Amount set to increase after ' + reupDate : ''}
         </label>

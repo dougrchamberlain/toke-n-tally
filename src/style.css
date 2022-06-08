@@ -1,35 +1,29 @@
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #e2ecf3;
-  display: flex;
-  flex-direction: column;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .progress {
-  background-color: rgb(255, 153, 0);
-  width: 50vw;
+  background-color: rgba(255, 34, 0, 1);
+  width: 90vw;
+  height: fit-content;
+  box-shadow: inset -15px -5px 20px 10px rgba(0, 0, 0, 1.0);
+  border-radius: 1em 1em;
 }
 
-.text--overlay {
-  position: relative;
-  margin-top: -1.5em;
-  display: flex;
-  margin-left: 20vw;
-  margin-bottom: 0.5em;
-  color: antiquewhite;
-}
 
-.progress > div:first-child,
-.chart--background {
-  background-color: green;
-  height: 2em;
+
+.progress>div:first-child {
+  background-color: rgb(173, 182, 166);
+  height: fit-content;
+  border-radius: 1em 0em 0em 1em;
 }
 
 .overlay-progress {
-  z-index: 2000;
-  float: right;
-  position: fixed;
-  height: 1.25em;
+  z-index: -2000;
+  border: 1px solid black;
+  height: fit-content;
+  box-shadow: inset 0px 0px 10px 10px rgb(253, 235, 163);
+  border-radius: 1em 0em 0em 1em;
 }
 
 .login--page section {
@@ -39,11 +33,11 @@ body {
 }
 
 input {
-  margin: 0.5em;
-  width: 30vw;
-  min-width: 15em;
+  width: min-content;
+  max-width: min-content;
+  min-width: 1em;
   border-radius: 0.5em;
-  line-height: 1.12em;
+  line-height: 1.25em;
   font-size: larger;
 }
 
@@ -63,21 +57,39 @@ button {
 
 .order--info {
   display: flex;
-  justify-content: space-evenly;
-  margin: 1em;
-  margin-bottom: 2em;
   flex-direction: column;
- 
+  align-items: center;
+  justify-content: space-evenly;
+  padding:1em;
+}
+
+.order--info label {
+  color:rgb(0, 0, 0);
 }
 
 
 .BubbleDisplay--container {
-  margin: 5px;
+  margin: 0.2em;
+  background-color: rgba(67, 131, 27, 0.9);
+  border-radius: 1em;
+  border: 2px solid darkslategrey;
+  padding: 1em;
 }
 
 iframe {
-  width: 100%;
+  width: 95vw;
   min-width: 100%;
-  max-height: max-content;
-  height: 90vh;
+  min-height: max-content;
+  height: 100vh;
+}
+
+.fractional--display {
+  font-size: smaller;
+}
+
+.text--overlay {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
 }

@@ -16,6 +16,7 @@ export default class App extends React.Component {
             </menu>
         </nav>
         <Orders human="" />
+        
       </div>)
   }
 
