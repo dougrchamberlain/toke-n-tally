@@ -21,9 +21,8 @@ export default class Orders extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
     this.state = {
-
-      amountAllowed: 0,
-      productType: "",
+      amountAllowed: 0.0,
+      productType: "unknown",
       reupDates: [],
       limit: 2.5
 
@@ -65,21 +64,22 @@ export default class Orders extends React.Component<any, any> {
       const delta = fractionToNumber(fraction) * quantity;
       let newAmount: number = 0;
 
-
+      console.log(dataObject);
       switch (payload.event) {
         case DUTCHIE_addProduct:
           newAmount = this.state.amountAllowed - delta
           break;
         case DUTCHIE_removeProduct:
-          newAmount = this.state.amountAllowed + delta
+          newAmount = this.state.amountAllowed + delta;
+          console.log('remove',newAmount);
+
           break;
       }
       const uid = auth.currentUser?.uid;
       const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
 
-      this.setState({ amountAllowed: newAmount });
 
-      set(ordersRef, this.state.amountAllowed
+      set(ordersRef, newAmount
       ).then((v: any) => {
       })
     }
@@ -98,7 +98,6 @@ export default class Orders extends React.Component<any, any> {
 
         onValue(ordersRef, (snapshot) => {
           this.setState(snapshot.val())
-          console.log(this.state);
         })
       }
     })
@@ -111,7 +110,7 @@ export default class Orders extends React.Component<any, any> {
     //fix this. it's over complicated and lazy
 
 
-    this.setState({ amountAllowed: value });
+    this.setState({ amountAllowed: parseFloat(value) });
   }
 
   syncAmounts() {
@@ -120,7 +119,7 @@ export default class Orders extends React.Component<any, any> {
 
     set(ordersRef, this.state.amountAllowed
     ).then((v) => {
-      console.log(v);
+      //do anything here that depends on
     })
   }
 
@@ -137,7 +136,7 @@ export default class Orders extends React.Component<any, any> {
         <div >
           <BubbleDisplay
             available={amountAllowed}
-            max={limit || 2.5}
+            max={limit }
             displayLabel={productType}
             reupDate={reupDates[0]}
           />
