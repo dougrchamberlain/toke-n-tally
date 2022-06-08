@@ -1,5 +1,5 @@
 import { initializeApp } from '@firebase/app';
-import { getAuth, onAuthStateChanged } from '@firebase/auth';
+import { getAuth, onAuthStateChanged, browserSessionPersistence } from '@firebase/auth';
 import { getDatabase, onValue, ref, set } from '@firebase/database';
 import * as React from 'react';
 import { ChangeEvent } from 'react';
@@ -11,8 +11,8 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 const DUTCHIE_EMBEDDED_URL = 'https://dutchie.com';
-const DUTCHIE_addProduct = 'ec:addProduct';
-const DUTCHIE_removeProduct = 'ec:removeProduct';
+const DUTCHIE_addProduct = 'add_to_cart';
+const DUTCHIE_removeProduct = 'remove_from_cart';
 
 //dispensed property
 //remaining property
@@ -34,7 +34,7 @@ export default class Orders extends React.Component<any, any> {
 
   }
 
-  onDutchieMessage({ data, origin }: MessageEvent) {
+  onDutchieMessage(event: MessageEvent) {
     // i.e. '1/2' -> .5
     // Invalid input returns 0 so impact on upstream callers are less likely to be impacted
     function fractionToNumber(fraction = '') {
@@ -47,59 +47,62 @@ export default class Orders extends React.Component<any, any> {
 
       return result;
     }
-    if (origin === DUTCHIE_EMBEDDED_URL) {
-      const { payload } = JSON.parse(data);
+    if (event.origin === DUTCHIE_EMBEDDED_URL) {
+      const dataObject = JSON.parse(event.data);
+      if (dataObject.event !== 'analytics:dataLayer') {
+        return;
+      }
       //dutchie has two properties. playload an payload.
-      switch (payload.event) {
+      const { payload: { ecommerce },event:cartEvent } = dataObject.payload;
+      console.log(cartEvent)
+      if(!ecommerce){
+        return;
+      }
+      const [item] = ecommerce.items;
+
+      const { item_variant, quantity } = item
+      const fraction = item_variant.replace(/oz/, '');
+      const delta = fractionToNumber(fraction) * quantity;
+      let newAmount = 0;
+      console.log(ecommerce.event);
+      switch (ecommerce.event) {
         case DUTCHIE_addProduct:
-          const [item] = payload.payload;
-          const { quantity, variant } = item;
-          const fraction = variant.replace(/oz/, '');
-          const delta = fractionToNumber(fraction) * quantity;
+          {
 
-          const uid = auth.currentUser?.uid;
-          const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
-
-
-          set(ordersRef, this.state.orders.amountAllowed - delta
-          ).then((v) => {
-            console.log(v);
-          })
-
-          break;
-        case DUTCHIE_removeProduct:{
-          const [item] = payload.payload;
-          const { quantity, variant } = item;
-          const fraction = variant.replace(/oz/, '');
-          const delta = fractionToNumber(fraction) * quantity;
-
-          const uid = auth.currentUser?.uid;
-          const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
-
-          set(ordersRef, this.state.orders.amountAllowed + delta
-            ).then((v) => {
-              console.log(v);
-            })
+             newAmount = this.state.orders.amountAllowed - delta
+             console.log(newAmount);
           }
           break;
-        case 'route:changed':
+        case DUTCHIE_removeProduct:
+          {
 
-          break;
-        default:
-          
+             newAmount = this.state.orders.amountAllowed + delta
+             console.log(newAmount);
+          }
           break;
       }
+      const uid = auth.currentUser?.uid;
+      const ordersRef = ref(db, `orders/${uid}`);
+
+      this.setState((prev:any) =>({
+        orders:{
+          ...prev.orders,
+          amountAllowed: newAmount
+        }
+      }));
+      set(ordersRef,  this.state.orders
+      ).then((v) => {
+        console.log(v);
+      })
+
+
     }
-
-
   }
 
 
   componentDidMount() {
-    window.addEventListener('message', this.onDutchieMessage);
-
-
     this.fetchData();
+    window.addEventListener('message', this.onDutchieMessage);
   }
 
   fetchData() {
@@ -122,10 +125,9 @@ export default class Orders extends React.Component<any, any> {
     //fix this. it's over complicated and lazy
     const orders = JSON.parse(JSON.stringify(this.state.orders))
     orders.amountAllowed = value;
- 
-    this.setState({orders});
-  }
 
+    this.setState({ orders });
+  }
 
   syncAmounts() {
     const uid = auth.currentUser?.uid;
@@ -134,7 +136,7 @@ export default class Orders extends React.Component<any, any> {
     set(ordersRef, this.state.orders.amountAllowed
     ).then((v) => {
       console.log(v);
-    })    
+    })
   }
 
   render() {
@@ -146,9 +148,8 @@ export default class Orders extends React.Component<any, any> {
     } = this.state.orders;
 
     return (
-      <section>
-
-        <div className="order--info">
+      <div className="order--info">
+        <div >
           <BubbleDisplay
             available={amountAllowed}
             max={limit || 2.5}
@@ -166,7 +167,7 @@ export default class Orders extends React.Component<any, any> {
             onChange={this.setAmountAllowed}
             onBlur={this.syncAmounts}
             step="0.01"
-            max="2.5"
+            max={limit}
             value={amountAllowed}
           />
         </div>
@@ -175,7 +176,7 @@ export default class Orders extends React.Component<any, any> {
             NO IFRAMES
           </iframe>
         </div>
-      </section>
+      </div>
     );
   }
 }
