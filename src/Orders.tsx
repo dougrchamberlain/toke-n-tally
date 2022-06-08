@@ -6,6 +6,17 @@ import { ChangeEvent } from 'react';
 import BubbleDisplay from './BubbleDisplay';
 import config from './config';
 
+function fractionToNumber(fraction = '') {
+  const fractionParts = fraction.split('/');
+  const numerator = fractionParts[0] || '0';
+  const denominator = fractionParts[1] || '1';
+  const radix = 10;
+  const number = parseInt(numerator, radix) / parseInt(denominator, radix);
+  const result = number || 0;
+
+  return result;
+}
+
 const app = initializeApp(config);
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -24,7 +35,7 @@ export default class Orders extends React.Component<any, any> {
       amountAllowed: 0.0,
       productType: "unknown",
       reupDates: [],
-      limit: 2.5
+      limit: 0.0
 
     };
     this.setAmountAllowed = this.setAmountAllowed.bind(this);
@@ -34,52 +45,42 @@ export default class Orders extends React.Component<any, any> {
   }
 
   onDutchieMessage(event: MessageEvent) {
-    // i.e. '1/2' -> .5
-    // Invalid input returns 0 so impact on upstream callers are less likely to be impacted
-    function fractionToNumber(fraction = '') {
-      const fractionParts = fraction.split('/');
-      const numerator = fractionParts[0] || '0';
-      const denominator = fractionParts[1] || '1';
-      const radix = 10;
-      const number = parseInt(numerator, radix) / parseInt(denominator, radix);
-      const result = number || 0;
-
-      return result;
-    }
     if (event.origin === DUTCHIE_EMBEDDED_URL) {
       const dataObject = JSON.parse(event.data);
+
       if (dataObject.event !== 'analytics:dataLayer') {
         return;
       }
       //dutchie has two properties. playload an payload.
-      const { payload, payload: { ecommerce }, event: cartEvent } = dataObject.payload;
-      console.log(cartEvent)
+      const { payload, payload: { ecommerce } } = dataObject.payload;
+
       if (!ecommerce) {
         return;
       }
-      console.log(ecommerce.items.length);
+
       const [item] = ecommerce.items;
 
       const { item_variant, quantity } = item
       const fraction = item_variant.replace(/oz/, '');
+
+
       const delta = fractionToNumber(fraction) * quantity;
+
+
       let newAmount: number = 0;
+      const { amountAllowed } = this.state;
 
       switch (payload.event) {
         case DUTCHIE_addProduct:
-          newAmount = this.state.amountAllowed - delta
+          newAmount = amountAllowed - delta
           break;
         case DUTCHIE_removeProduct:
-          newAmount = this.state.amountAllowed + delta;
+          newAmount = amountAllowed + delta;
           break;
       }
-      const uid = auth.currentUser?.uid;
-      const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
+      this.syncAmounts();
+      this.setState({ amountAllowed: newAmount });
 
-
-      set(ordersRef, newAmount
-      ).then((v: any) => {
-      })
     }
   }
 
@@ -105,9 +106,6 @@ export default class Orders extends React.Component<any, any> {
 
   setAmountAllowed(e: ChangeEvent<{ value: string }>) {
     const { value } = e.currentTarget;
-    //fix this. it's over complicated and lazy
-
-
     this.setState({ amountAllowed: parseFloat(value) });
   }
 
@@ -117,7 +115,9 @@ export default class Orders extends React.Component<any, any> {
 
     set(ordersRef, this.state.amountAllowed
     ).then((v) => {
+    
       //do anything here that depends on
+      console.log('pushed to cloud...');
     })
   }
 
@@ -134,7 +134,7 @@ export default class Orders extends React.Component<any, any> {
         <div >
           <BubbleDisplay
             available={amountAllowed}
-            max={limit }
+            max={limit}
             displayLabel={productType}
             reupDate={reupDates[0]}
           />
@@ -147,11 +147,11 @@ export default class Orders extends React.Component<any, any> {
             name="amountAllowed"
             placeholder="Amount Available"
             onChange={this.setAmountAllowed}
-            onBlur={this.syncAmounts}
             step="0.01"
             max={limit}
             value={amountAllowed}
           />
+          <button onClick={this.syncAmounts}>manual update</button>
         </div>
         <div className='iframe--store'>
           <iframe id='iframe-store' title='iframe-store' src="https://dutchie.com/embedded-menu/curaleaf-fl-st-petersburg/products/flower?">
