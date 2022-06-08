@@ -57,6 +57,7 @@ export default class Orders extends React.Component<any, any> {
       if (!ecommerce) {
         return;
       }
+      console.log(ecommerce.items.length);
       const [item] = ecommerce.items;
 
       const { item_variant, quantity } = item
@@ -64,15 +65,12 @@ export default class Orders extends React.Component<any, any> {
       const delta = fractionToNumber(fraction) * quantity;
       let newAmount: number = 0;
 
-      console.log(dataObject);
       switch (payload.event) {
         case DUTCHIE_addProduct:
           newAmount = this.state.amountAllowed - delta
           break;
         case DUTCHIE_removeProduct:
           newAmount = this.state.amountAllowed + delta;
-          console.log('remove',newAmount);
-
           break;
       }
       const uid = auth.currentUser?.uid;
