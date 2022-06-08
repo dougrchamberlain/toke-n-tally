@@ -1,5 +1,5 @@
 import { initializeApp } from '@firebase/app';
-import { getAuth, onAuthStateChanged, browserSessionPersistence } from '@firebase/auth';
+import { getAuth, onAuthStateChanged } from '@firebase/auth';
 import { getDatabase, onValue, ref, set } from '@firebase/database';
 import * as React from 'react';
 import { ChangeEvent } from 'react';
@@ -21,12 +21,12 @@ export default class Orders extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
     this.state = {
-      orders: {
-        amountAllowed: 0,
-        productType: "",
-        reupDates: [],
-        limit: 2.5
-      }
+
+      amountAllowed: 0,
+      productType: "",
+      reupDates: [],
+      limit: 2.5
+
     };
     this.setAmountAllowed = this.setAmountAllowed.bind(this);
     this.syncAmounts = this.syncAmounts.bind(this);
@@ -53,9 +53,9 @@ export default class Orders extends React.Component<any, any> {
         return;
       }
       //dutchie has two properties. playload an payload.
-      const { payload: { ecommerce },event:cartEvent } = dataObject.payload;
+      const { payload, payload: { ecommerce }, event: cartEvent } = dataObject.payload;
       console.log(cartEvent)
-      if(!ecommerce){
+      if (!ecommerce) {
         return;
       }
       const [item] = ecommerce.items;
@@ -63,42 +63,27 @@ export default class Orders extends React.Component<any, any> {
       const { item_variant, quantity } = item
       const fraction = item_variant.replace(/oz/, '');
       const delta = fractionToNumber(fraction) * quantity;
-      let newAmount = 0;
-      console.log(ecommerce.event);
-      switch (ecommerce.event) {
-        case DUTCHIE_addProduct:
-          {
+      let newAmount: number = 0;
 
-             newAmount = this.state.orders.amountAllowed - delta
-             console.log(newAmount);
-          }
+
+      switch (payload.event) {
+        case DUTCHIE_addProduct:
+          newAmount = this.state.amountAllowed - delta
           break;
         case DUTCHIE_removeProduct:
-          {
-
-             newAmount = this.state.orders.amountAllowed + delta
-             console.log(newAmount);
-          }
+          newAmount = this.state.amountAllowed + delta
           break;
       }
       const uid = auth.currentUser?.uid;
-      const ordersRef = ref(db, `orders/${uid}`);
+      const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
 
-      this.setState((prev:any) =>({
-        orders:{
-          ...prev.orders,
-          amountAllowed: newAmount
-        }
-      }));
-      set(ordersRef,  this.state.orders
-      ).then((v) => {
-        console.log(v);
+      this.setState({ amountAllowed: newAmount });
+
+      set(ordersRef, this.state.amountAllowed
+      ).then((v: any) => {
       })
-
-
     }
   }
-
 
   componentDidMount() {
     this.fetchData();
@@ -112,7 +97,8 @@ export default class Orders extends React.Component<any, any> {
         const ordersRef = ref(db, `orders/${uid}`);
 
         onValue(ordersRef, (snapshot) => {
-          this.setState({ orders: snapshot.val() })
+          this.setState(snapshot.val())
+          console.log(this.state);
         })
       }
     })
@@ -123,29 +109,28 @@ export default class Orders extends React.Component<any, any> {
   setAmountAllowed(e: ChangeEvent<{ value: string }>) {
     const { value } = e.currentTarget;
     //fix this. it's over complicated and lazy
-    const orders = JSON.parse(JSON.stringify(this.state.orders))
-    orders.amountAllowed = value;
 
-    this.setState({ orders });
+
+    this.setState({ amountAllowed: value });
   }
 
   syncAmounts() {
     const uid = auth.currentUser?.uid;
     const ordersRef = ref(db, `orders/${uid}/amountAllowed`);
 
-    set(ordersRef, this.state.orders.amountAllowed
+    set(ordersRef, this.state.amountAllowed
     ).then((v) => {
       console.log(v);
     })
   }
 
   render() {
-    const {
+    let {
       amountAllowed,
       productType,
       reupDates,
       limit
-    } = this.state.orders;
+    } = this.state;
 
     return (
       <div className="order--info">
@@ -176,6 +161,7 @@ export default class Orders extends React.Component<any, any> {
             NO IFRAMES
           </iframe>
         </div>
+
       </div>
     );
   }
