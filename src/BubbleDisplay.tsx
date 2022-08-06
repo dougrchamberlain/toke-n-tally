@@ -1,21 +1,29 @@
+import * as React from "react";
+import { fractionToNumber } from "./config";
+import {getAuth} from 'firebase/auth';
+import {initializeApp} from 'firebase/app';
+import {collection, setDoc, getFirestore} from 'firebase/firestore'
 
-import * as React from 'react';
-
-interface amount {
-  available: number;
-  max: number;
-  displayLabel: string;
-  reupDate: string;
+interface FillsInformation {
+  DateCreated: string;
+  DurationDays: number;
+  EndDate: string;
+  OrderType: string;
+  StartDate: string;
+  amountRemaining: string;
+  dispensableAmount: string;
 }
 
-class BubbleDisplay extends React.Component<amount, any> {
-
+class BubbleDisplay extends React.Component<FillsInformation> {
   renderProgressBar() {
-    const { available: remaining, max, displayLabel, reupDate } = this.props;
-    var percent = (remaining / max) * 100;
+    debugger;
+    const dispensableAmount = this.props.dispensableAmount.split("/")[0];
+    const decimalAmount = fractionToNumber(dispensableAmount);
+
+    var percent = (decimalAmount / 2.5) * 100;
     return (
       <div className="BubbleDisplay--container">
-        <label className='product--type'>{displayLabel}</label>
+        <label className="product--type">{"displayLabel"}</label>
         <div className="progress">
           <div
             style={{
@@ -24,18 +32,16 @@ class BubbleDisplay extends React.Component<amount, any> {
           >
             <div className="overlay-progress">
               <div className="overlay--labels">
-                <label className='fractional--display'>{remaining}/{max}oz</label>
-                <label className="text--overlay">
-                  {percent.toFixed(2)}%
+                <label className="fractional--display">
+                  {decimalAmount}/{2.5}oz
                 </label>
+                <label className="text--overlay">{"percent"}%</label>
               </div>
             </div>
           </div>
         </div>
 
-        <label htmlFor="reupDate">
-          {reupDate ? 'Amount set to increase after ' + reupDate : ''}
-        </label>
+        <label htmlFor="reupDate">date</label>
       </div>
     );
   }
